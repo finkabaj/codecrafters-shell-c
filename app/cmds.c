@@ -1,10 +1,12 @@
 #include "cmds.h"
+#include "trie.h"
 #include <stdio.h>
 #include <stdlib.h>
 
 const Command cmds[] = {
     {"exit", exit_handler},
     {"echo", echo_handler},
+    {"type", type_handler},
 };
 
 const size_t cmds_count = sizeof(cmds) / sizeof(cmds[0]);
@@ -38,4 +40,20 @@ void echo_handler(int argc, char **argv) {
     }
   }
   printf("\n");
+}
+
+void type_handler(int argc, char **argv) {
+  if (argc != 2) {
+    fprintf(stderr, "usage type [cmd]\n");
+    return;
+  }
+
+  TrieNode *node = find_in_trie(argv[1]);
+
+  if (!node) {
+    fprintf(stderr, "%s: not found\n", argv[1]);
+    return;
+  }
+
+  printf("%s is a shell builtin\n", argv[1]);
 }
