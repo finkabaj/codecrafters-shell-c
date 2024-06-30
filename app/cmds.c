@@ -4,6 +4,7 @@
 
 const Command cmds[] = {
     {"exit", exit_handler},
+    {"echo", echo_handler},
 };
 
 const size_t cmds_count = sizeof(cmds) / sizeof(cmds[0]);
@@ -22,4 +23,19 @@ void exit_handler(int argc, char **argv) {
   }
 
   exit(exit_code);
+}
+
+void echo_handler(int argc, char **argv) {
+  if (argc == 1) {
+    fprintf(stderr, "usage echo [string]\n");
+    return;
+  }
+
+  for (int i = 1; i < argc; i++) {
+    printf("%s", argv[i]);
+    if (i < argc - 1) {
+      printf(" ");
+    }
+  }
+  printf("\n");
 }
