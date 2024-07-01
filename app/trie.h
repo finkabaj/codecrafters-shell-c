@@ -5,7 +5,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#define ALPHABET_SIZE 62
+#define ALPHABET_SIZE 128
 
 typedef struct TrieNode TrieNode;
 
@@ -16,6 +16,7 @@ struct TrieNode {
 };
 
 int init_trie();
+int insert_cmd(const Command *cmd);
 TrieNode *find_in_trie(const char *cmd_name);
 
 #endif // TRIE_H

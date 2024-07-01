@@ -1,7 +1,6 @@
 #include "trie.h"
 #include "cmds.h"
 #include <assert.h>
-#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -9,7 +8,7 @@
 TrieNode *root = NULL;
 
 void free_trie(TrieNode *root) {
-  if (root == NULL) {
+  if (!root) {
     return;
   }
 
@@ -21,21 +20,12 @@ void free_trie(TrieNode *root) {
   free(root);
 }
 
-int char_to_index(char c) {
-  if (islower(c)) {
-    return c - 'a';
-  } else if (isupper(c)) {
-    return c - 'A' + 26;
-  } else if (isdigit(c)) {
-    return c - '0' + 52;
-  }
-  return -1;
-}
+int char_to_index(char c) { return (unsigned char)c; }
 
-int insert_cmd(TrieNode *root, const Command *cmd) {
-  assert(root != NULL);
-  assert(cmd != NULL);
-  assert(cmd->name != NULL);
+int _insert_cmd(TrieNode *root, const Command *cmd) {
+  assert(root);
+  assert(cmd);
+  assert(cmd->name);
 
   const char *current = cmd->name;
 
@@ -45,9 +35,9 @@ int insert_cmd(TrieNode *root, const Command *cmd) {
       return 0;
     }
 
-    if (root->children[index] == NULL) {
+    if (!root->children[index]) {
       root->children[index] = calloc(1, sizeof(TrieNode));
-      if (root->children[index] == NULL) {
+      if (!root->children[index]) {
         return 0;
       }
     }
@@ -61,15 +51,17 @@ int insert_cmd(TrieNode *root, const Command *cmd) {
   return 1;
 }
 
+int insert_cmd(const Command *cmd) { return _insert_cmd(root, cmd); }
+
 int init_trie() {
   root = calloc(1, sizeof(TrieNode));
 
-  if (root == NULL) {
+  if (!root) {
     return 0;
   }
 
   for (size_t i = 0; i < cmds_count; i++) {
-    if (!insert_cmd(root, &cmds[i])) {
+    if (!_insert_cmd(root, &cmds[i])) {
       free_trie(root);
       root = NULL;
       return 0;
@@ -80,7 +72,7 @@ int init_trie() {
 }
 
 TrieNode *_find_in_trie(TrieNode *node, const char *cmd_name) {
-  if (node == NULL || cmd_name == NULL) {
+  if (!node || !cmd_name) {
     return NULL;
   }
 
@@ -89,14 +81,14 @@ TrieNode *_find_in_trie(TrieNode *node, const char *cmd_name) {
     if (index == -1) {
       return NULL;
     }
-    if (node->children[index] == NULL) {
+    if (!node->children[index]) {
       return NULL;
     }
     node = node->children[index];
     cmd_name++;
   }
 
-  return (node->is_cmd && node->cmd != NULL) ? node : NULL;
+  return (node->is_cmd && node->cmd) ? node : NULL;
 }
 
 TrieNode *find_in_trie(const char *cmd_name) {

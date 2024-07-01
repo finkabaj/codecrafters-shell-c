@@ -4,9 +4,13 @@
 #include <stddef.h>
 
 typedef struct Command {
-  const char *name;
+  char *name;
   void (*function)(int argc, char **argv);
+  char *path;
 } Command;
+
+const Command *create_path_cmd(const char *name, const char *path);
+const Command *lookup_cmd(const char *cmd_name);
 
 void exit_handler(int argc, char **argv);
 void echo_handler(int argc, char **argv);

@@ -1,4 +1,7 @@
+#include "cmds.h"
+#include "path.h"
 #include "trie.h"
+#include "util.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -7,11 +10,12 @@ typedef struct TrieNode TrieNode;
 
 int repl(char input[]);
 int parse_input(char *input, char ***argv);
-void free_argv(int argc, char **argv);
 int execute_cmd(int argc, char **argv);
 
 int main(void) {
   char input[100];
+
+  init_path();
 
   if (!init_trie()) {
     return 1;
@@ -27,7 +31,7 @@ int repl(char input[]) {
   printf("$ ");
   fflush(stdout);
 
-  if (fgets(input, 100, stdin) == NULL) {
+  if (!fgets(input, 100, stdin)) {
     return 0;
   }
 
@@ -42,7 +46,7 @@ int repl(char input[]) {
     if (!code) {
       fprintf(stderr, "%s: command not found\n", input);
     }
-    free_argv(argc, argv);
+    free_ptr_to_str(argc, argv);
   } else if (argc == -1) {
     fprintf(stderr, "%s: error parsing command\n", input);
   }
@@ -51,6 +55,11 @@ int repl(char input[]) {
 }
 
 int parse_input(char *input, char ***argv) {
+  if (input[0] == '\0') {
+    *argv = NULL;
+    return 0;
+  }
+
   int argc = 0;
   int cap = 5;
   char **args = malloc(cap * sizeof(char *));
@@ -61,12 +70,12 @@ int parse_input(char *input, char ***argv) {
 
   char *token = strtok(input, " ");
 
-  while (token != NULL) {
+  while (token) {
     if (argc >= cap) {
       cap *= 2;
       char **new_args = realloc(args, cap * sizeof(char *));
       if (!new_args) {
-        free_argv(argc, args);
+        free_ptr_to_str(argc, args);
         return -1;
       }
       args = new_args;
@@ -74,7 +83,7 @@ int parse_input(char *input, char ***argv) {
 
     args[argc] = strdup(token);
     if (!args[argc]) {
-      free_argv(argc, args);
+      free_ptr_to_str(argc, args);
       return -1;
     }
 
@@ -87,21 +96,18 @@ int parse_input(char *input, char ***argv) {
 }
 
 int execute_cmd(int argc, char **argv) {
-  TrieNode *node = find_in_trie(argv[0]);
-  if (node == NULL) {
+  const Command *cmd = lookup_cmd(argv[0]);
+
+  if (!cmd) {
     return 0;
   }
-  node->cmd->function(argc, argv);
+
+  if (cmd->function) {
+    cmd->function(argc, argv);
+  } else {
+    // Do nothing for now
+    return 0;
+  }
+
   return 1;
-}
-
-void free_argv(int argc, char **argv) {
-  if (argv == NULL) {
-    return;
-  }
-
-  for (int i = 0; i < argc; i++) {
-    free(argv[i]);
-  }
-  free(argv);
 }

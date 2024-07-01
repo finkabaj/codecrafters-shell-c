@@ -1,15 +1,69 @@
 #include "cmds.h"
+#include "path.h"
 #include "trie.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 const Command cmds[] = {
-    {"exit", exit_handler},
-    {"echo", echo_handler},
-    {"type", type_handler},
+    {"exit", exit_handler, NULL},
+    {"echo", echo_handler, NULL},
+    {"type", type_handler, NULL},
 };
 
 const size_t cmds_count = sizeof(cmds) / sizeof(cmds[0]);
+
+const Command *create_path_cmd(const char *name, const char *path) {
+  Command *cmd = malloc(sizeof(Command));
+  if (!cmd)
+    return NULL;
+
+  cmd->name = strdup(name);
+  if (!cmd->name) {
+    free(cmd);
+    return NULL;
+  }
+
+  cmd->path = strdup(path);
+  if (!cmd->path) {
+    free(cmd->name);
+    free(cmd);
+    return NULL;
+  }
+
+  cmd->function = NULL;
+  return cmd;
+}
+
+const Command *lookup_cmd(const char *cmd_name) {
+  TrieNode *node = find_in_trie(cmd_name);
+
+  if (node && node->cmd) {
+    return node->cmd;
+  }
+
+  char *full_path = find_in_path(cmd_name);
+
+  if (!full_path) {
+    return NULL;
+  }
+
+  const Command *cmd = create_path_cmd(cmd_name, full_path);
+  free(full_path);
+
+  if (!cmd) {
+    return NULL;
+  }
+
+  if (!insert_cmd(cmd)) {
+    free(cmd->name);
+    free(cmd->path);
+    free((void *)cmd);
+    return NULL;
+  }
+
+  return cmd;
+}
 
 void exit_handler(int argc, char **argv) {
   if (argc > 2) {
@@ -48,10 +102,15 @@ void type_handler(int argc, char **argv) {
     return;
   }
 
-  TrieNode *node = find_in_trie(argv[1]);
+  const Command *cmd = lookup_cmd(argv[1]);
 
-  if (!node) {
+  if (!cmd) {
     fprintf(stderr, "%s: not found\n", argv[1]);
+    return;
+  }
+
+  if (cmd->path) {
+    printf("%s is %s\n", argv[1], cmd->path);
     return;
   }
 
