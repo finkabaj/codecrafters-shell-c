@@ -30,7 +30,7 @@ void init_path(void) {
   pathc = 0;
 
   while (token) {
-    if (pathc > 1) {
+    if (pathc >= 1) {
       char **new_path = realloc(path, (pathc + 1) * sizeof(char *));
       if (!new_path) {
         free(path_copy);

@@ -5,6 +5,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/wait.h>
+#include <unistd.h>
 
 typedef struct TrieNode TrieNode;
 
@@ -12,15 +14,18 @@ int repl(char input[]);
 int parse_input(char *input, char ***argv);
 int execute_cmd(int argc, char **argv);
 
-int main(void) {
-  char input[100];
-
+int main(int argc, char **argv) {
   init_path();
 
   if (!init_trie()) {
     return 1;
   }
 
+  if (argc > 1) {
+    return execute_cmd(argc - 1, argv + 1);
+  }
+
+  char input[1024];
   while (repl(input))
     ;
 
@@ -31,11 +36,11 @@ int repl(char input[]) {
   printf("$ ");
   fflush(stdout);
 
-  if (!fgets(input, 100, stdin)) {
+  if (!fgets(input, 1024, stdin)) {
     return 0;
   }
 
-  input[strlen(input) - 1] = '\0';
+  input[strcspn(input, "\n")] = '\0';
 
   char **argv = NULL;
 
@@ -105,8 +110,23 @@ int execute_cmd(int argc, char **argv) {
   if (cmd->function) {
     cmd->function(argc, argv);
   } else {
-    // Do nothing for now
-    return 0;
+    pid_t pid = fork();
+
+    if (pid < 0) {
+      perror("fork");
+      return 0;
+    }
+
+    if (pid == 0) {
+      char *new_argv[argc + 1];
+      memcpy(new_argv, argv, argc * sizeof(char *));
+      new_argv[argc] = NULL;
+      execv(cmd->path, new_argv);
+      perror("execv");
+      exit(1);
+    } else {
+      waitpid(pid, 0, 0);
+    }
   }
 
   return 1;
