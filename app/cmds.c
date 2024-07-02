@@ -9,6 +9,7 @@ const Command cmds[] = {
     {"exit", exit_handler, NULL},
     {"echo", echo_handler, NULL},
     {"type", type_handler, NULL},
+    {"pwd", pwd_handler, NULL},
 };
 
 const size_t cmds_count = sizeof(cmds) / sizeof(cmds[0]);
@@ -115,4 +116,14 @@ void type_handler(int argc, char **argv) {
   }
 
   printf("%s is a shell builtin\n", argv[1]);
+}
+
+void pwd_handler(int argc, char **argv) {
+  (void)argv;
+  if (argc > 1) {
+    printf("pwd: too many arguments\n");
+    return;
+  }
+
+  printf("%s\n", get_pwd());
 }

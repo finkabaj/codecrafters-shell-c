@@ -1,3 +1,4 @@
+#include "path.h"
 #include "util.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -5,6 +6,7 @@
 #include <unistd.h>
 
 char **path = NULL;
+char *pwd = NULL;
 int pathc = 0;
 
 void init_path(void) {
@@ -55,6 +57,21 @@ void init_path(void) {
   }
 
   free(path_copy);
+}
+
+void _get_pwd() {
+  pwd = malloc(MAX_PWD_LEN * sizeof(char));
+  if (pwd) {
+    getcwd(pwd, MAX_PWD_LEN);
+  }
+}
+
+char *get_pwd() {
+  if (!pwd) {
+    _get_pwd();
+  }
+
+  return pwd;
 }
 
 char *find_in_path(const char *cmd_name) {

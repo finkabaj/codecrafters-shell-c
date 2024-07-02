@@ -15,9 +15,15 @@ int parse_input(char *input, char ***argv);
 int execute_cmd(int argc, char **argv);
 
 int main(int argc, char **argv) {
+  if (!get_pwd()) {
+    printf("shell: error geting pwd\n");
+    return 1;
+  }
+
   init_path();
 
   if (!init_trie()) {
+    printf("shell: error while initalizing\n");
     return 1;
   }
 
