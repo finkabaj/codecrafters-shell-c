@@ -133,8 +133,8 @@ void cd_handler(int argc, char **argv) {
   }
 
   if (argc == 2) {
-    set_cwd(argv[1]);
-  } else {
-    // do nothing
+    set_cwd(*argv[1] == '~' ? get_home_dir() : argv[1]);
+  } else if (argc == 1) {
+    set_cwd(get_home_dir());
   }
 }

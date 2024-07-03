@@ -7,5 +7,6 @@ void init_path(void);
 char *get_cwd(void);
 int set_cwd(char *path);
 char *find_in_path(const char *cmd_name);
+char *get_home_dir(void);
 
 #endif

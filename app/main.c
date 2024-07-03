@@ -19,6 +19,7 @@ int main(int argc, char **argv) {
     printf("shell: error geting pwd\n");
     return 1;
   }
+  get_home_dir();
 
   init_path();
 

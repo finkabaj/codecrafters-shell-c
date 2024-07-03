@@ -7,6 +7,7 @@
 
 char **path = NULL;
 char cwd[MAX_CWD_LEN] = {0};
+char *home_dir = NULL;
 int pathc = 0;
 
 void init_path(void) {
@@ -57,6 +58,19 @@ void init_path(void) {
   }
 
   free(path_copy);
+}
+
+char *get_home_dir(void) {
+  if (!home_dir) {
+    home_dir = getenv("HOME");
+
+    if (!home_dir) {
+      fprintf(stderr, "error: HOME environment variable not set\n");
+      return NULL;
+    }
+  }
+
+  return home_dir;
 }
 
 void _get_cwd(char *cwd) {
