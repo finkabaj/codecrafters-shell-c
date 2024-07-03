@@ -6,10 +6,9 @@
 #include <string.h>
 
 const Command cmds[] = {
-    {"exit", exit_handler, NULL},
-    {"echo", echo_handler, NULL},
-    {"type", type_handler, NULL},
-    {"pwd", pwd_handler, NULL},
+    {"exit", exit_handler, NULL}, {"echo", echo_handler, NULL},
+    {"type", type_handler, NULL}, {"pwd", pwd_handler, NULL},
+    {"cd", cd_handler, NULL},
 };
 
 const size_t cmds_count = sizeof(cmds) / sizeof(cmds[0]);
@@ -121,9 +120,21 @@ void type_handler(int argc, char **argv) {
 void pwd_handler(int argc, char **argv) {
   (void)argv;
   if (argc > 1) {
-    printf("pwd: too many arguments\n");
+    fprintf(stderr, "pwd: too many arguments\n");
     return;
   }
 
-  printf("%s\n", get_pwd());
+  printf("%s\n", get_cwd());
+}
+
+void cd_handler(int argc, char **argv) {
+  if (argc > 3) {
+    fprintf(stderr, "cd: too many arguments\n");
+  }
+
+  if (argc == 2) {
+    set_cwd(argv[1]);
+  } else {
+    // do nothing
+  }
 }

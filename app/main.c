@@ -15,7 +15,7 @@ int parse_input(char *input, char ***argv);
 int execute_cmd(int argc, char **argv);
 
 int main(int argc, char **argv) {
-  if (!get_pwd()) {
+  if (!get_cwd()) {
     printf("shell: error geting pwd\n");
     return 1;
   }

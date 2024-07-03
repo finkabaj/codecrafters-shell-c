@@ -6,7 +6,7 @@
 #include <unistd.h>
 
 char **path = NULL;
-char *pwd = NULL;
+char cwd[MAX_CWD_LEN] = {0};
 int pathc = 0;
 
 void init_path(void) {
@@ -59,19 +59,28 @@ void init_path(void) {
   free(path_copy);
 }
 
-void _get_pwd() {
-  pwd = malloc(MAX_PWD_LEN * sizeof(char));
-  if (pwd) {
-    getcwd(pwd, MAX_PWD_LEN);
+void _get_cwd(char *cwd) {
+  if (cwd) {
+    getcwd(cwd, MAX_CWD_LEN);
   }
 }
 
-char *get_pwd() {
-  if (!pwd) {
-    _get_pwd();
+char *get_cwd() {
+  if (*cwd == '\0') {
+    _get_cwd(cwd);
   }
 
-  return pwd;
+  return cwd;
+}
+
+int set_cwd(char *path) {
+  if (chdir(path) == 0) {
+    _get_cwd(cwd);
+    return 1;
+  }
+
+  perror(path);
+  return 0;
 }
 
 char *find_in_path(const char *cmd_name) {
