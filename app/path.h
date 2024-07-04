@@ -8,5 +8,6 @@ char *get_cwd(void);
 int set_cwd(char *path);
 char *find_in_path(const char *cmd_name);
 char *get_home_dir(void);
+void add_path_cmds(void);
 
 #endif

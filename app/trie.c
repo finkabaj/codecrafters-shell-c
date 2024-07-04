@@ -17,12 +17,20 @@ void free_trie(TrieNode *root) {
     root->children[i] = NULL;
   }
 
+  if (root->cmd) {
+    free(root->cmd->name);
+    if (root->cmd->path) {
+      free(root->cmd->path);
+    }
+    free(root->cmd);
+  }
+
   free(root);
 }
 
 int char_to_index(char c) { return (unsigned char)c; }
 
-int _insert_cmd(TrieNode *root, const Command *cmd) {
+int _insert_cmd(TrieNode *root, Command *cmd) {
   assert(root);
   assert(cmd);
   assert(cmd->name);
@@ -46,12 +54,16 @@ int _insert_cmd(TrieNode *root, const Command *cmd) {
     current++;
   }
 
+  if (root->is_cmd) {
+    return 0;
+  }
+
   root->is_cmd = 1;
   root->cmd = cmd;
   return 1;
 }
 
-int insert_cmd(const Command *cmd) { return _insert_cmd(root, cmd); }
+int insert_cmd(Command *cmd) { return _insert_cmd(root, cmd); }
 
 int init_trie() {
   root = calloc(1, sizeof(TrieNode));

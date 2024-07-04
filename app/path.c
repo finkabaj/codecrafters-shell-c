@@ -1,5 +1,8 @@
 #include "path.h"
+#include "cmds.h"
+#include "trie.h"
 #include "util.h"
+#include <dirent.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -58,6 +61,34 @@ void init_path(void) {
   }
 
   free(path_copy);
+}
+
+void add_path_cmds(void) {
+  for (int i = 0; i < pathc; i++) {
+    DIR *d;
+    d = opendir(path[i]);
+    if (!d) {
+      continue;
+    }
+    struct dirent *dir;
+    while ((dir = readdir(d)) != NULL) {
+      if (dir->d_type != DT_REG) {
+        continue;
+      }
+      char path_buff[BUFSIZ];
+      snprintf(path_buff, BUFSIZ, "%s/%s", path[i], dir->d_name);
+      if (access(path_buff, X_OK) != 0) {
+        continue;
+      }
+      Command *cmd = create_path_cmd(dir->d_name, path_buff);
+      if (cmd && !insert_cmd(cmd)) {
+        free(cmd->name);
+        free(cmd->path);
+        free(cmd);
+      }
+    }
+    closedir(d);
+  }
 }
 
 char *get_home_dir(void) {

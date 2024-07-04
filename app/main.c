@@ -13,7 +13,13 @@ typedef struct TrieNode TrieNode;
 int repl(char input[]);
 int parse_input(char *input, char ***argv);
 int execute_cmd(int argc, char **argv);
+int list_cmd(void);
 
+// TODO: implement cmd completion on '\t'
+// step 1) add all exe in PATH to trie **DONE**
+// step 2) add trie traversal
+// step 3) add cmd selection when user click on '\t'
+// step 4) minimize memory overhead
 int main(int argc, char **argv) {
   if (!get_cwd()) {
     printf("shell: error geting pwd\n");
@@ -27,6 +33,8 @@ int main(int argc, char **argv) {
     printf("shell: error while initalizing\n");
     return 1;
   }
+
+  add_path_cmds();
 
   if (argc > 1) {
     return execute_cmd(argc - 1, argv + 1);

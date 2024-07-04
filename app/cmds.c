@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-const Command cmds[] = {
+Command cmds[] = {
     {"exit", exit_handler, NULL}, {"echo", echo_handler, NULL},
     {"type", type_handler, NULL}, {"pwd", pwd_handler, NULL},
     {"cd", cd_handler, NULL},
@@ -13,7 +13,7 @@ const Command cmds[] = {
 
 const size_t cmds_count = sizeof(cmds) / sizeof(cmds[0]);
 
-const Command *create_path_cmd(const char *name, const char *path) {
+Command *create_path_cmd(const char *name, const char *path) {
   Command *cmd = malloc(sizeof(Command));
   if (!cmd)
     return NULL;
@@ -48,7 +48,7 @@ const Command *lookup_cmd(const char *cmd_name) {
     return NULL;
   }
 
-  const Command *cmd = create_path_cmd(cmd_name, full_path);
+  Command *cmd = create_path_cmd(cmd_name, full_path);
   free(full_path);
 
   if (!cmd) {
@@ -132,8 +132,10 @@ void cd_handler(int argc, char **argv) {
     fprintf(stderr, "cd: too many arguments\n");
   }
 
+  // TODO: ~/.. roots
   if (argc == 2) {
-    set_cwd(*argv[1] == '~' ? get_home_dir() : argv[1]);
+    set_cwd(*argv[1] == '~' && *(argv[1] + 1) == '\0' ? get_home_dir()
+                                                      : argv[1]);
   } else if (argc == 1) {
     set_cwd(get_home_dir());
   }
