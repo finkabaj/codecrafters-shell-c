@@ -15,9 +15,11 @@ int parse_input(char *input, char ***argv);
 int execute_cmd(int argc, char **argv);
 int list_cmd(void);
 
+// INFO: consider memory pool in future
+
 // TODO: implement cmd completion on '\t'
 // step 1) add all exe in PATH to trie **DONE**
-// step 2) add trie traversal
+// step 2) add trie traversal **DONE**
 // step 3) add cmd selection when user click on '\t'
 // step 4) minimize memory overhead
 int main(int argc, char **argv) {
@@ -56,6 +58,17 @@ int repl(char input[]) {
   }
 
   input[strcspn(input, "\n")] = '\0';
+
+  // if (*input == '\t' && *(input + 1) == '\0') {
+  //   CommandNameList *list = traverse_trie_prefix("cp");
+  //   if (list) {
+  //     for (int i = 0; i < list->count; i++) {
+  //       printf("%s\n", list->cmd_names[i]);
+  //     }
+  //     free_command_name_list(list);
+  //   }
+  //   return 1;
+  // }
 
   char **argv = NULL;
 

@@ -3,11 +3,19 @@
 
 #include <stddef.h>
 
-typedef struct Command {
+#define INITIAL_NAME_LIST_CAP 128
+
+typedef struct {
   char *name;
   void (*function)(int argc, char **argv);
   char *path;
 } Command;
+
+typedef struct {
+  char **cmd_names;
+  int count;
+  int capacity;
+} CommandNameList;
 
 Command *create_path_cmd(const char *name, const char *path);
 const Command *lookup_cmd(const char *cmd_name);

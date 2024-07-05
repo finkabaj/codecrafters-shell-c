@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 TrieNode *root = NULL;
 
@@ -100,9 +101,84 @@ TrieNode *_find_in_trie(TrieNode *node, const char *cmd_name) {
     cmd_name++;
   }
 
-  return (node->is_cmd && node->cmd) ? node : NULL;
+  return node;
 }
 
-TrieNode *find_in_trie(const char *cmd_name) {
-  return _find_in_trie(root, cmd_name);
+TrieNode *find_cmd_in_trie(const char *cmd_name) {
+  TrieNode *node = _find_in_trie(root, cmd_name);
+  return (node && node->is_cmd && node->cmd) ? node : NULL;
+}
+
+void _traverse_trie_prefix(TrieNode *node, char *prefix, int depth,
+                           CommandNameList *list) {
+  if (!node) {
+    return;
+  }
+
+  if (node->is_cmd && node->cmd) {
+    if (list->count >= list->capacity) {
+      int new_capacity = list->capacity * 2;
+      char **new_commands =
+          realloc(list->cmd_names, new_capacity * sizeof(char *));
+      if (!new_commands) {
+        return;
+      }
+      list->cmd_names = new_commands;
+      list->capacity = new_capacity;
+    }
+
+    list->cmd_names[list->count] = strdup(prefix);
+    if (list->cmd_names[list->count]) {
+      list->count++;
+    }
+  }
+
+  for (int i = 0; i < ALPHABET_SIZE; i++) {
+    if (node->children[i]) {
+      prefix[depth] = i;
+      prefix[depth + 1] = '\0';
+      _traverse_trie_prefix(node->children[i], prefix, depth + 1, list);
+    }
+  }
+  prefix[depth] = '\0';
+}
+
+CommandNameList *traverse_trie_prefix(const char *cmd_prefix) {
+  TrieNode *node = _find_in_trie(root, cmd_prefix);
+  if (!node) {
+    return NULL;
+  }
+
+  CommandNameList *list = malloc(sizeof(CommandNameList));
+  if (!list) {
+    return NULL;
+  }
+
+  list->cmd_names = malloc(INITIAL_NAME_LIST_CAP * sizeof(char *));
+  if (!list->cmd_names) {
+    free(list);
+    return NULL;
+  }
+
+  list->capacity = INITIAL_NAME_LIST_CAP;
+  list->count = 0;
+
+  char prefix[BUFSIZ];
+  strncpy(prefix, cmd_prefix, sizeof(prefix) - 1);
+  prefix[sizeof(prefix) - 1] = '\0';
+  int prefix_len = strlen(prefix);
+
+  _traverse_trie_prefix(node, prefix, prefix_len, list);
+
+  return list;
+}
+
+void free_command_name_list(CommandNameList *list) {
+  if (!list)
+    return;
+  for (int i = 0; i < list->count; i++) {
+    free(list->cmd_names[i]);
+  }
+  free(list->cmd_names);
+  free(list);
 }

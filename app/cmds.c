@@ -36,7 +36,7 @@ Command *create_path_cmd(const char *name, const char *path) {
 }
 
 const Command *lookup_cmd(const char *cmd_name) {
-  TrieNode *node = find_in_trie(cmd_name);
+  TrieNode *node = find_cmd_in_trie(cmd_name);
 
   if (node && node->cmd) {
     return node->cmd;
