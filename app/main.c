@@ -68,8 +68,6 @@ int main(int argc, char **argv) {
     return 1;
   }
 
-  add_path_cmds();
-
   if (argc > 1) {
     return execute_cmd(argc - 1, argv + 1);
   }
@@ -209,6 +207,9 @@ void handle_tab_completion(char *prefix) {
   }
 
   int pre_len = strlen(prefix);
+
+  add_path_cmds(prefix, pre_len);
+
   CommandNameList *list = traverse_trie_prefix(prefix);
   if (list) {
     int max_width = 0;
@@ -219,7 +220,7 @@ void handle_tab_completion(char *prefix) {
       }
     }
 
-    int cols = (term_ln + 1) / (max_width + 2);
+    int cols = (100 + 1) / (max_width + 2);
     int rows = (list->count + cols - 1) / cols;
 
     printf("\033[s\033[?25l");

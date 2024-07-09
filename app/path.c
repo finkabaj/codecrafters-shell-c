@@ -63,7 +63,7 @@ void init_path(void) {
   free(path_copy);
 }
 
-void add_path_cmds(void) {
+void add_path_cmds(char *prefix, int prefix_len) {
   for (int i = 0; i < pathc; i++) {
     DIR *d;
     d = opendir(path[i]);
@@ -72,12 +72,12 @@ void add_path_cmds(void) {
     }
     struct dirent *dir;
     while ((dir = readdir(d)) != NULL) {
-      if (dir->d_type != DT_REG) {
-        continue;
-      }
       char path_buff[BUFSIZ];
       snprintf(path_buff, BUFSIZ, "%s/%s", path[i], dir->d_name);
       if (access(path_buff, X_OK) != 0) {
+        continue;
+      }
+      if (strncmp(prefix, dir->d_name, prefix_len) != 0) {
         continue;
       }
       Command *cmd = create_path_cmd(dir->d_name, path_buff);
